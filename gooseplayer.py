@@ -228,7 +228,9 @@ if __name__ == "__main__":
     sim = GooseSim(args.filename, args.srcmac, args.appid)
     logger.info("Started Playing %s", args.filename)
     sim.run(args.ifa, args.ifb, args.acc)
-    logger.info("Succesfully Played %s, LAN A: %s telegrams, LAN B: %s, telegrams ",
-                args.filename, len(sim.lana), len(sim.lanb))
-    logger.info("Total Delay for Channel A: %s ms", sim.totaldelaya * 1000)
-    logger.info("Total Delay for Channel B: %s ms", sim.totaldelayb * 1000)
+    logger.info("Succesfully Played %s, LAN A: %s telegrams with %.fms delay, LAN B: %s telegrams with %.fms delay ",
+                args.filename,
+                len(sim.lana),
+                sim.totaldelaya * 1000,
+                len(sim.lanb),
+                sim.totaldelayb * 1000)
