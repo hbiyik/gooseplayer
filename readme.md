@@ -12,7 +12,7 @@ usage: gooseplayer.py [-h] [--appid appid] [--srcmac source mac address]
 example:
 
 ```
-python3 gooseplayer.py test.pcapng wi-fi wi-fi --appid 58 -acc 0.01
+python3 gooseplayer.py test.pcapng wi-fi-a Network-b --appid 58 -acc 0.01
 ```
 
 output:
