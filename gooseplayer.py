@@ -30,7 +30,7 @@ logger = logging.getLogger("GooseSim")
 
 
 class GooseSim:
-    def __init__(self, filename, sendera, senderb, sendernonred, routea=False, routeb=False, srcmac=None, gooseappid=None):
+    def __init__(self, filename, sendera, senderb, sendernonred, routea=False, routeb=False, srcmac=None, gooseappid=None, forcevlan=None):
         self.deltat = None
         self.firstts = None
         self.routea = routea
@@ -59,6 +59,9 @@ class GooseSim:
                 if srcmac and srcmac != src:
                     continue
                 isgoose, voffset = self.isgoose(data)
+                if voffset and forcevlan is not None:
+                    vlantag = (((data[14] & 0xF0) << 8) + (forcevlan & 0xFFF)).to_bytes(2, byteorder='big')
+                    data = data[0:14] + vlantag + data[16:] 
                 if isgoose: # goose
                     appid = data[voffset + 14: voffset + 16]
                     if gooseappid and gooseappid != appid:
@@ -87,7 +90,7 @@ class GooseSim:
                     else:
                         # non redundant gooses
                         self.addgoose(block.timestamp, data, self.nonred)
-                        
+
     def isgoose(self, data):
         voffset = 0
         typ = data[12:14]
@@ -272,6 +275,7 @@ if __name__ == "__main__":
     parser.add_argument('ifb', metavar='interface-b', type=str,  help='network interface name to play PRP Lan A Goose Telegrams')
     parser.add_argument('ifnonred', metavar='interface-nonred', type=str,  help='network interface name to play Non Redundant Goose Telegrams')
     parser.add_argument('--appid', metavar='appid', type=int,  help='filter goose telegrams according to appid', default=None)
+    parser.add_argument('--forcevlan', metavar='force vlan id', type=int,  help='force vlan id of the published goose telegrams', default=None)
     parser.add_argument('--srcmac', metavar='source mac address', type=str,  help='filter goose telegrams according source mac address', default=None)
     parser.add_argument('--routea', help='route lana telegrams to non redundant interface', action="store_true")
     parser.add_argument('--routeb', help='route lanb telegrams to non redundant interface', action="store_true")
@@ -293,7 +297,7 @@ if __name__ == "__main__":
     senderb = Sender(args.ifb, CHANB)
     sendernonred = Sender(args.ifnonred, NONRED)
     sim = GooseSim(args.filename, sendera, senderb, sendernonred,
-                   args.routea, args.routeb, args.srcmac, args.appid)
+                   args.routea, args.routeb, args.srcmac, args.appid, args.forcevlan)
     logger.info("Started Playing %s", args.filename)
     sim.run(args.acc)
     
